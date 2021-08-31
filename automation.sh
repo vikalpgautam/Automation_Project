@@ -24,9 +24,32 @@ systemctl enable apache2
 cd /var/log/apache2/
 
 timestamp=$(date '+%d%m%Y-%H%M%S')
-filename='vikalp-httpd-logs-'$timestamp'.tar'
-s3bucket='upgrad-vikalp'
+myname='vikalp'
+filename=$myname'-httpd-logs-'$timestamp'.tar'
+s3bucket='upgrad-'$myname
 
 tar -cvf /tmp/$filename access.log error.log
 
+inventoryfile='/var/www/html/inventory.html'
+tarfilesize=$(ls -lh /tmp/$filename | awk '{print $5}')
+if [ -e "$inventoryfile" ]
+then
+	echo "File already exists...updating!"
+	echo "httpd-logs	$timestamp	tar	$tarfilesize" >> $inventoryfile
+else
+	cat <<- "EOF" > $inventoryfile
+	Log Type	Date Created	Type	Size
+	EOF
+	echo "httpd-logs	$timestamp	tar	$tarfilesize" >> $inventoryfile
+fi
+
+
 aws s3 cp /tmp/$filename s3://$s3bucket/$filename
+
+cronfile='/etc/cron.d/automation'
+if [ ! -f "$cronfile" ]
+then
+	cat > /etc/cron.d/automation <<- "EOF"
+	0 1 * * * root /root/Automation_Project/automation.sh
+	EOF
+fi
