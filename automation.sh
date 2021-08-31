@@ -46,3 +46,10 @@ fi
 
 aws s3 cp /tmp/$filename s3://$s3bucket/$filename
 
+cronfile='/etc/cron.d/automation'
+if [ ! -f "$cronfile" ]
+then
+	cat > /etc/cron.d/automation <<- "EOF"
+	0 1 * * * root /root/Automation_Project/automation.sh
+	EOF
+fi
