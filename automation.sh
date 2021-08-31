@@ -24,8 +24,9 @@ systemctl enable apache2
 cd /var/log/apache2/
 
 timestamp=$(date '+%d%m%Y-%H%M%S')
-filename='vikalp-httpd-logs-'$timestamp'.tar'
-s3bucket='upgrad-vikalp'
+myname='vikalp'
+filename=$myname'-httpd-logs-'$timestamp'.tar'
+s3bucket='upgrad-'$myname
 
 tar -cvf /tmp/$filename access.log error.log
 
